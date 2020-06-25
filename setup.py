@@ -10,14 +10,14 @@ setuptools.setup(
     version="0.0.1",
     author="Vipin Sharma",
     author_email="sh.vipin@gmail.com",
-    description="A ZERO '0' weight ORM for sqlite3 database.",
+    description="A zero, 0, weight ORM for sqlite3 database.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/gitvipin/sql30",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: BSD-2 License",
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Operating System :: OS Independent",
     ],
 )
