@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 class Model(object):
 
     DB_SCHEMA = {
-            'db_name' : 'DEFAULT_DB',
+            'db_name': 'DEFAULT_DB',
             'tables': []
             }
     VALIDATE_BEFORE_WRITE = False
@@ -104,7 +104,7 @@ class Model(object):
         cols = '(%s)' % ','.join(cols)
 
         cmnd = '''CREATE TABLE %s %s''' % (tbl_name, cols)
-        print ("Creating Table as : ", cmnd)
+        log.info("Creating Table as : ", cmnd)
         self._cursor.execute(cmnd)
 
     def _get_schema(self, tbl_name):
@@ -122,7 +122,6 @@ class Model(object):
     def _form_constraints(self, _separator='and', kwargs=None):
         constraints = ['%s=:%s' % (key, key) for key, _ in kwargs.items()]
         return (' %s ' % _separator).join(constraints)
-
 
     def _validate_bfr_write(self, tbl, kwargs):
         if not self.VALIDATE_BEFORE_WRITE:
@@ -147,7 +146,7 @@ class Model(object):
         values = [kwargs.get(field, '') for field, _ in tbl_schema['fields'].items()]
 
         self._cursor.execute(
-                'INSERT INTO %s VALUES (%s)' % (tbl,','.join(['?'] * len(values))),
+                'INSERT INTO %s VALUES (%s)' % (tbl, ','.join(['?'] * len(values))),
                 values)
 
     def read(self, tbl, include_header=False, **kwargs):
@@ -162,7 +161,7 @@ class Model(object):
             query = 'SELECT * FROM %s ' % tbl
             self._cursor.execute(query, kwargs)
 
-        result = self._cursor.fetchall()    # TODO : Can be inefficient at scale.
+        result = self._cursor.fetchall() # TODO : Can be inefficient at scale.
         if include_header:
             header = [d[0] for d in self._cursor.description]
             result.insert(0, header)
