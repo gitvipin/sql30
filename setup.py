@@ -12,7 +12,7 @@ with open("sql30/__init__.py") as fp:
 
 setuptools.setup(
     name="sql30",
-    version="0.0.1",
+    version=version['__version__'],
     author="Vipin Sharma",
     author_email="sh.vipin@gmail.com",
     description="A zero, 0, weight ORM for sqlite3 database.",
