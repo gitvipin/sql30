@@ -5,6 +5,11 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+version = {}
+with open("sql30/__init__.py") as fp:
+    exec(fp.read(), version)
+
+
 setuptools.setup(
     name="sql30",
     version="0.0.1",
