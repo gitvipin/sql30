@@ -1,4 +1,6 @@
-# Sql30
+[![Github All Releases](https://img.shields.io/pypi/dm/sql30)]()
+
+# SQL30
 
 sql30 is a zero weight ORM for sqlite3 in Python. 
 
