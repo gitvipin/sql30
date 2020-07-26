@@ -110,7 +110,8 @@ class Model(object):
     def _get_schema(self, tbl_name):
         """
         """
-        tbl_schema = [x for x in self.DB_SCHEMA['tables'] if x['name'] == tbl_name]
+        tbl_schema = [x for x in self.DB_SCHEMA['tables'] if
+                      x['name'] == tbl_name]
         return tbl_schema[0] if tbl_schema else None
 
     def _get_fields(self, tbl_name):
@@ -135,7 +136,9 @@ class Model(object):
         if unknown:
             raise AssertionError("Unknown columns :%r" % unknown)
 
-    def write(self, tbl, **kwargs):
+    # CRUD operation methods' definition.
+
+    def create(self, tbl, **kwargs):
         self._validate_bfr_write(tbl, kwargs)
         tbl_schema = self._get_schema(tbl)
 
@@ -143,11 +146,12 @@ class Model(object):
         # guarantes that keys of a dictionry by default come in same order as
         # they were declared. Here, we simply form an ordered tuple of values
         # in the same order as the columns were declared in schema.
-        values = [kwargs.get(field, '') for field, _ in tbl_schema['fields'].items()]
+        values = [kwargs.get(field, '') for field, _
+                  in tbl_schema['fields'].items()]
 
-        self._cursor.execute(
-                'INSERT INTO %s VALUES (%s)' % (tbl, ','.join(['?'] * len(values))),
-                values)
+        self._cursor.execute('INSERT INTO %s VALUES (%s)' % (tbl,
+                             ','.join(['?'] * len(values))),
+                             values)
 
     def read(self, tbl, include_header=False, **kwargs):
         """
@@ -161,7 +165,7 @@ class Model(object):
             query = 'SELECT * FROM %s ' % tbl
             self._cursor.execute(query, kwargs)
 
-        result = self._cursor.fetchall() # TODO : Can be inefficient at scale.
+        result = self._cursor.fetchall()  # TODO : Can be inefficient at scale.
         if include_header:
             header = [d[0] for d in self._cursor.description]
             result.insert(0, header)
@@ -175,7 +179,11 @@ class Model(object):
         kwargs.update(condition)
         self._cursor.execute(query, kwargs)
 
-    def remove(self, tbl, **kwargs):
+    def delete(self, tbl, **kwargs):
         constraints = self._form_constraints(kwargs=kwargs)
         query = 'DELETE FROM %s WHERE %s' % (tbl, constraints)
         self._cursor.execute(query, kwargs)
+
+    # Backward compatibility (release 0.0.1 ).
+    write = create
+    remove = delete
