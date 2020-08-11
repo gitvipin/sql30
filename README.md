@@ -1,4 +1,4 @@
-[![Github All Releases](https://img.shields.io/pypi/dm/sql30)]()
+[![Downloads](https://pepy.tech/badge/sql30)](https://pepy.tech/project/sql30)
 
 # SQL30
 
