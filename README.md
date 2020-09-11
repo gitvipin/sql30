@@ -66,11 +66,11 @@ Now, we can create instance of Review and that will handle CRUD operations to da
 >>> db = reviews.Reviews()
 
 # With this, we can create/write records to db as following.
+>>> tbl = 'reviews' # or db.TABLE
 >>> db.write(tbl, rid=1, header='good thing', rating=5)
 >>> db.write(tbl, rid=2, header='bad thing', rating=1, desc='what a disgusting thing')
 
 # We can read back the records as shown below.
->>> tbl = 'reviews'
 >>> results = db.read(tbl, rid=1)
 
 # Querying over the records is possble as below.
