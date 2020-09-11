@@ -121,7 +121,7 @@ using dumb terminal settings.
 >>> from sql30 import db
 >>> import os
 >>> os.system('uname -a')
-VMkernel prom-0505695d9ce.nsbucqesystem.test 6.5.0 #1 SMP Release build-13753126 May 19 2019 21:13:25 x86_64 x86_64 x86_64 ESXi
+VMkernel prom-0505695d9ce.xyz.test 6.5.0 #1 SMP Release build-13753126 May 19 2019 21:13:25 x86_64 x86_64 x86_64 ESXi
 0
 >>> class Dummy(db.Model):
 ...     pass
