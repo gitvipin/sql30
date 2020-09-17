@@ -22,9 +22,18 @@ class Model(object):
         self.DB_SCHEMA['db_name'] = self._db    # if came from kwargs
         self._conn = sqlite3.connect(self._db)
         self._cursor = self._conn.cursor()
+        self._table = None
 
         # Initialize Database
         self.init_db(schema=self.DB_SCHEMA)
+
+    @property
+    def table(self):
+        return self._table
+
+    @table.setter
+    def table(self, val):
+        self._table = val
 
     @property
     def cursor(self):
@@ -138,7 +147,9 @@ class Model(object):
 
     # CRUD operation methods' definition.
 
-    def create(self, tbl, **kwargs):
+    def create(self, tbl=None, **kwargs):
+        tbl = tbl or self.table
+        assert tbl, "No table set for operation"
         self._validate_bfr_write(tbl, kwargs)
         tbl_schema = self._get_schema(tbl)
 
@@ -153,10 +164,12 @@ class Model(object):
                              ','.join(['?'] * len(values))),
                              values)
 
-    def read(self, tbl, include_header=False, **kwargs):
+    def read(self, tbl=None, include_header=False, **kwargs):
         """
         Read from Table all the records with requested constraints.
         """
+        tbl = tbl or self.table
+        assert tbl, "No table set for operation"
         if kwargs:
             constraints = self._form_constraints(kwargs=kwargs)
             query = 'SELECT * FROM %s WHERE %s' % (tbl, constraints)
@@ -172,14 +185,19 @@ class Model(object):
 
         return result
 
-    def update(self, tbl, condition, **kwargs):
+    def update(self, tbl=None, condition={}, **kwargs):
+        tbl = tbl or self.table
+        assert tbl, "No table set for operation"
+        assert condition, "With no/empty condition, WHERE clause cannot be set for UPDATE"
         cond = self._form_constraints(kwargs=condition)
         values = self._form_constraints(_separator=',', kwargs=kwargs)
         query = 'UPDATE %s SET %s WHERE %s' % (tbl, values, cond)
         kwargs.update(condition)
         self._cursor.execute(query, kwargs)
 
-    def delete(self, tbl, **kwargs):
+    def delete(self, tbl=None, **kwargs):
+        tbl = tbl or self.table
+        assert tbl, "No table set for operation"
         constraints = self._form_constraints(kwargs=kwargs)
         query = 'DELETE FROM %s WHERE %s' % (tbl, constraints)
         self._cursor.execute(query, kwargs)
