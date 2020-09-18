@@ -117,8 +117,12 @@ Once python prompt is exit, a SHELL prompt can be used for checking the contents
 (LPAD) root@Pali/tmp/LPAD$ sqlite3 reviews.db
 SQLite version 3.22.0 2018-01-22 18:45:57
 Enter ".help" for usage hints.
+sqlite> .header on
+sqlite> .column on
 sqlite> select * from reviews;
-2|bad thing|1|what a disgusting thing
+header      rid         desc        rating
+----------  ----------  ----------  ----------
+average it  2           what a dis  2
 sqlite> .quit
 (LPAD) root@Pali/tmp/LPAD$
 ```
