@@ -5,20 +5,20 @@ import unittest
 
 from sql30 import db
 
-DB_NAME = 'config.db'
+DB_NAME = 'cube.db'
 
 
 class Config(db.Model):
-    TABLE = 'config'
-    PKEY = 'rid'
+    TABLE = 'cube'
+    PKEY = 'num'
     DB_SCHEMA = {
         'db_name': DB_NAME,
         'tables': [
             {
                 'name': TABLE,
                 'fields': {
-                    'cid': 'int',
-                    'value': 'int',
+                    'num': 'int',
+                    'cube': 'int',
                     },
                 'primary_key': PKEY
             }]
@@ -28,30 +28,31 @@ class Config(db.Model):
 
 class ScaleTest(unittest.TestCase):
 
-    SQUARE_NUM_UPTO = 250   # make it multiple of 5
+    CUBE_NUM_UPTO = 20   # make it multiple of 5
+    TABLE = 'cube'
 
     def setUp(self):
         if os.path.exists(DB_NAME):
             os.remove(DB_NAME)
 
         db = Config()
-        db.table = 'config'
-        db.create(cid=-1, value=1)
+        db.table = self.TABLE
+        db.create(num=-1, cube=1)
 
     def test_scale(self):
 
         def func(start, end):
             db = Config()
-            db.table = 'config'
+            db.table = self.TABLE
             for x in range(start, end):
-                db.create(cid=x, value=x*x)
-            db.commit()
+                db.create(num=x, cube=x*x)
+            db.close()
 
         # Below 50 threads are created in parallel which make
         # entries in the database at the same time by adding the
-        # square of 5 numbers (each) at the same time.
+        # cube of 5 numbers (each) at the same time.
         workers = []
-        for i in range(int(self.SQUARE_NUM_UPTO / 5)):
+        for i in range(int(self.CUBE_NUM_UPTO / 5)):
             start, end = i*5, i*5 + 5
             t = threading.Thread(target=func, args=(start, end))
             workers.append(t)
@@ -60,14 +61,15 @@ class ScaleTest(unittest.TestCase):
         _ = [t.join() for t in workers]
 
         db = Config()
-        db.table = 'config'
+        db.table = self.TABLE
 
         # read all the records and check that entries were made for all
         # of them.
         recs = db.read()
+        # print (sorted(recs))
         keys = [x for x, _ in recs]
         # print(sorted(keys))
-        assert all([x in keys for x in range(self.SQUARE_NUM_UPTO)])
+        assert all([x in keys for x in range(self.CUBE_NUM_UPTO)])
 
     def tearDown(self):
         os.remove(DB_NAME)
