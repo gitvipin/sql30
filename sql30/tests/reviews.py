@@ -42,7 +42,19 @@ class ReviewTest(unittest.TestCase):
         try:
             db.read()
         except Exception as err:
-            self.assertIn('No table set for operation', err.args)
+            self.assertIn('No table set for operation', str(err))
+
+    def test_primary_key(self):
+        """
+        Ensures , primary key is honored.
+        """
+        db = Reviews()
+        db.table = 'reviews'
+        db.write(rid=10, rating=5)
+        try:
+            db.write(rid=10, rating=4)
+        except sqlite3.IntegrityError as err:
+            self.assertIn('UNIQUE constraint failed', str(err))
 
     def _test_CREATE(self):
         db = Reviews()
