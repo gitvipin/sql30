@@ -1,0 +1,18 @@
+SQL30 (Release Notes)
+-----------------------
+
+0.1.3 (Minor)
+--------------
+- Allow table name to be set as property for subsequent CRUD operations on this table.
+- Unit test for reviews example.
+- Scale test for square and cube examples.
+- Documentation update on example to inspect database file.
+
+
+0.1.2 (Minor)
+--------------
+- APIs with CRUD names.
+- License change from GPL to BSD.
+- Include sanity test in package.
+- Downloads badge icon in README
+- Installation section in README.
