@@ -113,7 +113,7 @@ class Model(object):
         cols = '(%s)' % ','.join(cols)
 
         cmnd = '''CREATE TABLE %s %s''' % (tbl_name, cols)
-        log.info("Creating Table as : ", cmnd)
+        log.info("Creating Table as : %s", cmnd)
         self._cursor.execute(cmnd)
 
     def _get_schema(self, tbl_name):
