@@ -77,3 +77,6 @@ class ContextTest(unittest.TestCase):
         with Config() as db:
             recs = db.read(tbl=db.TABLE, num=-1)
             self.assertEqual(len(recs), 1)
+
+    def tearDown(self):
+        os.remove(DB_NAME)
