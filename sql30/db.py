@@ -17,11 +17,24 @@ class Model(object):
             }
     VALIDATE_BEFORE_WRITE = False
 
+    # Initialize global connection to sqlite database.
+    INIT_CONNECTION = True
+
     def __init__(self, **kwargs):
         self._db = kwargs.get('db_name', None) or self.DB_SCHEMA['db_name']
         self.DB_SCHEMA['db_name'] = self._db    # if came from kwargs
-        self._conn = sqlite3.connect(self._db)
-        self._cursor = self._conn.cursor()
+
+        # Common connection and cursor for interacting with databse.
+        self._conn = None
+        self._cursor = None
+
+        # Context Manager's db connection and cursor.
+        self._context_conn = None
+        self._context_cursor = None
+
+        if self.INIT_CONNECTION:
+            self.init_connection()
+
         self._table = None
 
         # Initialize Database
@@ -36,16 +49,55 @@ class Model(object):
         self._table = val
 
     @property
+    def connection(self):
+        # If you are inside a context, all the operations are presumed
+        # to be done on the context. Otherwise, it is global context.
+        return self._context_conn or self._conn
+
+    @property
     def cursor(self):
-        return self._cursor
+        return self._context_cursor if self._context_conn else self._cursor
+
+    def init_connection(self):
+        """
+        Initializes connection to database. It must be called before performing
+        any CRUD operations. It is automatically called unless INIT_CONNECTION
+        is set to false intentionally in which case, user must call it
+        explicitly.
+        """
+        if not self._conn:
+            self._conn = sqlite3.connect(self._db)
+            self._cursor = self._conn.cursor()
 
     def commit(self):
-        self._conn.commit()
+        self.connection.commit()
 
     def close(self, commit=True):
         if commit:
-            self._conn.commit()
-        self._conn.close()
+            self.connection.commit()
+        self.connection.close()
+
+    def __enter__(self):
+        assert not self._context_conn, "nested context not allowed"
+        self._context_conn = sqlite3.connect(self._db)
+        self._context_cursor = self._context_conn.cursor()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if self._context_conn:
+            self._context_conn.commit()
+            self._context_conn.close()
+            self._context_conn = None
+            self._context_cursor = None
+
+    def getContext(self):
+        """
+        To be used as following in legacy code.
+
+        with self.getContext() as db:
+            db.create(...)
+        """
+        return self
 
     def init_db(self, schema):
         '''
@@ -114,7 +166,7 @@ class Model(object):
 
         cmnd = '''CREATE TABLE %s %s''' % (tbl_name, cols)
         log.info("Creating Table as : %s", cmnd)
-        self._cursor.execute(cmnd)
+        self.cursor.execute(cmnd)
 
     def _get_schema(self, tbl_name):
         """
@@ -160,9 +212,9 @@ class Model(object):
         values = [kwargs.get(field, '') for field, _
                   in tbl_schema['fields'].items()]
 
-        self._cursor.execute('INSERT INTO %s VALUES (%s)' % (tbl,
-                             ','.join(['?'] * len(values))),
-                             values)
+        self.cursor.execute('INSERT INTO %s VALUES (%s)' % (tbl,
+                            ','.join(['?'] * len(values))),
+                            values)
 
     def read(self, tbl=None, include_header=False, **kwargs):
         """
@@ -173,14 +225,14 @@ class Model(object):
         if kwargs:
             constraints = self._form_constraints(kwargs=kwargs)
             query = 'SELECT * FROM %s WHERE %s' % (tbl, constraints)
-            self._cursor.execute(query, kwargs)
+            self.cursor.execute(query, kwargs)
         else:
             query = 'SELECT * FROM %s ' % tbl
-            self._cursor.execute(query, kwargs)
+            self.cursor.execute(query, kwargs)
 
-        result = self._cursor.fetchall()  # TODO : Can be inefficient at scale.
+        result = self.cursor.fetchall()  # TODO : Can be inefficient at scale.
         if include_header:
-            header = [d[0] for d in self._cursor.description]
+            header = [d[0] for d in self.cursor.description]
             result.insert(0, header)
 
         return result
@@ -188,19 +240,20 @@ class Model(object):
     def update(self, tbl=None, condition={}, **kwargs):
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
-        assert condition, "With no/empty condition, WHERE clause cannot be set for UPDATE"
+        msg = "With no/empty condition, WHERE clause cannot be set for UPDATE"
+        assert condition, msg
         cond = self._form_constraints(kwargs=condition)
         values = self._form_constraints(_separator=',', kwargs=kwargs)
         query = 'UPDATE %s SET %s WHERE %s' % (tbl, values, cond)
         kwargs.update(condition)
-        self._cursor.execute(query, kwargs)
+        self.cursor.execute(query, kwargs)
 
     def delete(self, tbl=None, **kwargs):
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
         constraints = self._form_constraints(kwargs=kwargs)
         query = 'DELETE FROM %s WHERE %s' % (tbl, constraints)
-        self._cursor.execute(query, kwargs)
+        self.cursor.execute(query, kwargs)
 
     # Backward compatibility (release 0.0.1 ).
     write = create
