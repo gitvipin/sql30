@@ -71,5 +71,26 @@ class ScaleTest(unittest.TestCase):
         # print(sorted(keys))
         assert all([x in keys for x in range(self.SQUARE_NUM_UPTO)])
 
+    def test_context(self):
+        """
+        Tests for context manager operations.
+        """
+        # TEST CASE 1:
+        # Create a new database instance and use it under context
+        # manager. This is the suggested usecase. Context Manager
+        # when exiting, commits the work and also closes the
+        # connection so user doesn't have to explicitly do so.
+        with Config() as db:
+            db.table = db.TABLE
+            db.create(num=-2, square=4)
+
+        # TEST CASE 2:
+        # Read data back in new context to ensure data was saved in
+        # the previous context.
+        db = Config()
+        with db.getContext() as db:
+            recs = db.read(tbl=db.TABLE, num=-2)
+            self.assertEqual(len(recs), 1)
+
     def tearDown(self):
         os.remove(DB_NAME)
