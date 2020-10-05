@@ -1,6 +1,13 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.1.4 (Minor)
+--------------
+- Add context Manager to the db.Model. With context manager, users need not
+  commit the work and close the connection as it is done automatically at
+  the end of the context.
+- Bug Fixes.
+
 0.1.3 (Minor)
 --------------
 - Allow table name to be set as property for subsequent CRUD operations on this table.
