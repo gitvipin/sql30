@@ -24,6 +24,8 @@ class Model(object):
         self._db = kwargs.get('db_name', None) or self.DB_SCHEMA['db_name']
         self.DB_SCHEMA['db_name'] = self._db    # if came from kwargs
 
+        self.verbose = kwargs.get('verbose', False)
+
         # Common connection and cursor for interacting with databse.
         self._conn = None
         self._cursor = None
@@ -70,6 +72,8 @@ class Model(object):
             self._cursor = self._conn.cursor()
 
     def commit(self):
+        if self.verbose:
+            log.debug("Performing COMMIT via %s", self.connection)
         self.connection.commit()
 
     def close(self, commit=True):
@@ -79,6 +83,8 @@ class Model(object):
         if conn == self._conn:
             self._conn = None
             self._cursor = None
+        if self.verbose:
+            log.debug("Clossing connection %s", conn)
         conn.close()
 
     def __enter__(self):
@@ -153,7 +159,8 @@ class Model(object):
         pkey = schema.get('primary_key', None)
 
         if self.table_exists(tbl_name):
-            log.info("Table %s exists, skipped from creation", tbl_name)
+            if self.verbose:
+                log.debug("Table %s exists, skipped from creation", tbl_name)
             return
 
         cols = []
