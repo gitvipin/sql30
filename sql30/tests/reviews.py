@@ -5,7 +5,7 @@ import unittest
 
 from sql30 import db
 
-DB_NAME = 'review.db'
+DB_NAME = './review.db'
 
 
 class Reviews(db.Model):

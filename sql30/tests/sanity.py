@@ -39,7 +39,7 @@ class Reviews(db.Model):
 # class TestReviews(unittest.TestCase):
 class TestReviews(object):
 
-    DB_NAME = 'test_reviews.db'
+    DB_NAME = './test_reviews.db'
 
     def setUp(self):
         self._delete_db()
