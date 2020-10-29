@@ -3,10 +3,13 @@
 A simple interface for interacting with SQLite example.
 '''
 import logging
+import os
 import sqlite3
 
 
 log = logging.getLogger(__name__)
+
+PATHSEP = '/'
 
 
 class Model(object):
@@ -17,11 +20,22 @@ class Model(object):
             }
     VALIDATE_BEFORE_WRITE = False
 
+    # Location where database files should be saved.
+    DB_FILE_LOC = '/opt/sql30/'
+
     # Initialize global connection to sqlite database.
     INIT_CONNECTION = True
 
     def __init__(self, **kwargs):
+        # set default DB file location
+        self._db_loc = kwargs.get('db_loc', None) or self.DB_FILE_LOC
+
         self._db = kwargs.get('db_name', None) or self.DB_SCHEMA['db_name']
+        if PATHSEP not in self._db:
+            if not os.path.exists(self.db_loc):
+                os.makedirs(self.db_loc)
+            self._db = os.path.join(self.db_loc, self._db)
+
         self.DB_SCHEMA['db_name'] = self._db    # if came from kwargs
 
         self.verbose = kwargs.get('verbose', False)
@@ -49,6 +63,18 @@ class Model(object):
     @table.setter
     def table(self, val):
         self._table = val
+
+    @property
+    def db_loc(self):
+        return self._db_loc
+
+    @db_loc.setter
+    def db_loc(self, val):
+        self._db_loc = val
+
+    @property
+    def db_file(self):
+        return self._db
 
     @property
     def connection(self):

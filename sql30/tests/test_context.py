@@ -4,7 +4,7 @@ import unittest
 
 from sql30 import db
 
-DB_NAME = 'context.db'
+DB_NAME = './context.db'
 
 
 class Config(db.Model):

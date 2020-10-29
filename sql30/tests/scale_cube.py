@@ -5,7 +5,7 @@ import unittest
 
 from sql30 import db
 
-DB_NAME = 'cube.db'
+DB_NAME = './cube.db'
 
 
 class Config(db.Model):

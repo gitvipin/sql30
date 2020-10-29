@@ -5,7 +5,7 @@ import unittest
 
 from sql30 import db
 
-DB_NAME = 'square.db'
+DB_NAME = './square.db'
 
 
 class Config(db.Model):
