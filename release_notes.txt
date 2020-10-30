@@ -1,6 +1,14 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.1.5 (beta)
+--------------
+- Make location of database files configurable. By default all the files will
+  be placed in /opt/sql30/ directory unless 'db_name' itself has a file separator
+  in it to notify that full/relative path has been chosen by user.
+- Fix log messages.
+- Enable verbose mode based on init param 'verbose'
+
 0.1.4 (Minor)
 --------------
 - Add context Manager to the db.Model. With context manager, users need not
