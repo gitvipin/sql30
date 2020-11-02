@@ -36,7 +36,7 @@ class Reviews(db.Model):
     TABLE = 'reviews'
     PKEY = 'rid'
     DB_SCHEMA = {
-        'db_name': 'reviews.db',
+        'db_name': './reviews.db',
         'tables': [
             {
                 'name': TABLE,
@@ -66,30 +66,31 @@ Now, we can create instance of Review and that will handle CRUD operations to da
 >>> db = reviews.Reviews()
 
 # With this, we can create/write records to db as following.
->>> tbl = 'reviews' # select database table, you want to operate on.
->>> db.write(tbl, rid=1, header='good thing', rating=5)
->>> db.write(tbl, rid=2, header='bad thing', rating=1, desc='what a disgusting thing')
+>>> db.tbl = 'reviews' # Select database table, for all the future CRUD operations.
+                       # You can switch between tables in case of multiple tables in DB.
+>>> db.write(rid=1, header='good thing', rating=5)
+>>> db.write(header='bad thing', rid=2, rating=1, desc='what a disgusting thing')
 
 # We can then read back the records individually are as whole as shown below.
 
 # To read all the records from a table, simply pass the table name.
->>> db.read(tbl)
+>>> db.read()
 [(1, 'good thing', 5, ''), (2, 'bad thing', 1, 'what a disgusting thing')]
 
 # To read the records from table, simply pass on the condition as params.
->>> db.read(tbl, rid=1) # Get records from table WHERE rid=1
+>>> db.read(rid=1) # Get records from table WHERE rid=1
 [(1, 'good thing', 5, '')]
 
 # Get records from table WHERE rid=1 and rating=3. Note that, there is no
 # restriction on the order in which condition needs to be provided. Only
 # the param name should be one of the COLUMN(s) in table.
->>> db.read(tbl, rating=3, rid=1)
+>>> db.read(rating=3, rid=1)
 []
->>> db.read(tbl, rating=5, rid=1)
+>>> db.read(rating=5, rid=1)
 [(1, 'good thing', 5, '')]
 
 # If we try to add another record with same primary key, it will error out.
->>> db.write(tbl, rid=1, header='good thing', rating=5)
+>>> db.write(rid=1, header='good thing', rating=5)
 Traceback (most recent call last):
   ...
   ...
@@ -97,13 +98,13 @@ sqlite3.IntegrityError: UNIQUE constraint failed: reviews.rid
 
 # Updating the record is also possible by providing condition for records and updated values.
 >>> where = {'rid': 2}
->>> db.update(tbl, condition=where, header='average item', rating=2)
->>> db.read(tbl)
+>>> db.update(condition=where, header='average item', rating=2)
+>>> db.read()
 [(1, 'good thing', 5, ''), (2, 'average item', 2, 'what a disgusting thing')]
 
 # Deleteing the records is possble with any level of filtering.
->>> db.remove(tbl, rid=1)
->>> db.read(tbl)
+>>> db.remove(rid=1)
+>>> db.read()
 [(2, 'average item', 2, 'what a disgusting thing')]
 
 # At this point, however, all of your records are being maintained by SQLITE in-memory.
