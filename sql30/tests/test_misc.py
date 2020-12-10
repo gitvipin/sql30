@@ -107,6 +107,12 @@ class MiscTest(unittest.TestCase):
             # Average value of square when 1 <= num <= 2 should be 2.5
             self.assertEqual(db.avg('square', num=(1, 2)), 2.5)
 
+            # Mixed filtering.
+            self.assertEqual(db.avg('square', num=(1, 2), square=4), 4)
+
+            # Mixed filtering.
+            self.assertEqual(db.avg('square', num=(1, 3), square=[1, 4]), 2.5)
+
     def test_range(self):
         """
         Tests for RANGE operations.
