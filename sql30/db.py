@@ -292,6 +292,21 @@ class Model(object):
         query = 'DELETE FROM %s WHERE %s' % (tbl, constraints)
         self.cursor.execute(query, kwargs)
 
+    def count(self, tbl=None, **kwargs):
+        tbl = tbl or self.table
+        assert tbl, "No table set for operation"
+        constraints = self._form_constraints(kwargs=kwargs)
+        if constraints:
+            query = 'SELECT COUNT(*) FROM %s WHERE %s' % (tbl, constraints)
+        else:
+            query = 'SELECT COUNT(*) FROM %s ' % tbl
+
+        self.cursor.execute(query, kwargs)
+        try:
+            return self.cursor.fetchone()[0]
+        except:
+            return None
+
     # Backward compatibility (release 0.0.1 ).
     write = create
     remove = delete
