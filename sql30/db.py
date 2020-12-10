@@ -292,20 +292,40 @@ class Model(object):
         query = 'DELETE FROM %s WHERE %s' % (tbl, constraints)
         self.cursor.execute(query, kwargs)
 
-    def count(self, tbl=None, **kwargs):
+    def _misc(self, method, field, tbl=None, **kwargs):
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
         constraints = self._form_constraints(kwargs=kwargs)
         if constraints:
-            query = 'SELECT COUNT(*) FROM %s WHERE %s' % (tbl, constraints)
+            query = 'SELECT %s(%s) FROM %s WHERE %s' % (method, field,
+                                                        tbl, constraints)
         else:
-            query = 'SELECT COUNT(*) FROM %s ' % tbl
+            query = 'SELECT %s(%s) FROM %s ' % (method, field, tbl)
 
         self.cursor.execute(query, kwargs)
         try:
             return self.cursor.fetchone()[0]
-        except:
+        except Exception as err:
+            log.exception(err)
             return None
+
+    def count(self, tbl=None, **kwargs):
+        return self._misc('COUNT', '*', tbl=tbl, **kwargs)
+
+    def min(self, field, tbl=None, **kwargs):
+        tbl = tbl or self.table
+        assert field in self._get_fields(tbl)
+        return self._misc('MIN', field, tbl=tbl, **kwargs)
+
+    def max(self, field, tbl=None, **kwargs):
+        tbl = tbl or self.table
+        assert field in self._get_fields(tbl)
+        return self._misc('MAX', field, tbl=tbl, **kwargs)
+
+    def avg(self, field, tbl=None, **kwargs):
+        tbl = tbl or self.table
+        assert field in self._get_fields(tbl)
+        return self._misc('AVG', field, tbl=tbl, **kwargs)
 
     # Backward compatibility (release 0.0.1 ).
     write = create
