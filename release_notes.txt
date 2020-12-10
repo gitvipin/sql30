@@ -1,6 +1,12 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.1.6 (Minor)
+--------------
+- Add APIs for miscellaneous operations around - count, min, max, avg
+- Add range based filters in Queries. Previously only equality based queries were allowed
+  for CRUD operations. Range based filters applicable to miscellaneous operations also.
+
 0.1.5 (beta)
 --------------
 - Make location of database files configurable. By default all the files will
