@@ -219,7 +219,14 @@ class Model(object):
         return [key for key, _ in _schema['fields'].items()]
 
     def _form_constraints(self, _separator='and', kwargs=None):
-        constraints = ['%s=:%s' % (key, key) for key, _ in kwargs.items()]
+        def is_range(x): return isinstance(x, tuple) or isinstance(x, list)
+        constraints = []
+        for key, val in kwargs.items():
+            if is_range(val):
+                cparam = '%s BETWEEN %s AND %s' % (key, val[0], val[1])
+            else:
+                cparam = '%s=:%s' % (key, key)
+            constraints.append(cparam)
         return (' %s ' % _separator).join(constraints)
 
     def _validate_bfr_write(self, tbl, kwargs):
