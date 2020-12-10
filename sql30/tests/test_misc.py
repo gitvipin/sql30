@@ -47,7 +47,6 @@ class MiscTest(unittest.TestCase):
         """
         Tests for context manager operations.
         """
-        import pdb ; pdb.set_trace()
         with Square() as db:
             db.table = self.TABLE
             self.assertEqual(db.count(), 3)
@@ -55,7 +54,36 @@ class MiscTest(unittest.TestCase):
             self.assertEqual(db.count(num=2), 1)
             self.assertEqual(db.count(square=9), 1)
 
+    def test_min(self):
+        """
+        Tests for context manager operations.
+        """
+        with Square() as db:
+            db.table = self.TABLE
+            self.assertEqual(db.min('num'), 1)
+            self.assertEqual(db.min('square'), 1)
 
+            self.assertEqual(db.min('square', num=2), 4)
+
+    def test_max(self):
+        """
+        Tests for context manager operations.
+        """
+        with Square() as db:
+            db.table = self.TABLE
+            self.assertEqual(db.max('num'), 3)
+            self.assertEqual(db.max('square'), 9)
+
+            self.assertEqual(db.max('square', num=2), 4)
+
+    def test_avg(self):
+        """
+        Tests for context manager operations.
+        """
+        with Square() as db:
+            db.table = self.TABLE
+            self.assertEqual(db.avg('num'), 2)
+            self.assertEqual(db.avg('square', num=3), 9)
 
     def tearDown(self):
         os.remove(DB_NAME)
