@@ -1,6 +1,10 @@
-#!/bin/env/python
+#!/usr/bin/env python
+# Copyright (c) 2020 Vipin Sharma. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2 License
+# The full license information can be found in LICENSE.txt
+# in the root directory of this project.
 '''
-A simple interface for interacting with SQLite example.
+A simple ORM for interacting with SQLite database.
 '''
 import logging
 import os
@@ -134,6 +138,31 @@ class Model(object):
             db.create(...)
         """
         return self
+
+    def fetch_db(self):
+        """ Fetches DB Schema and populates table info """
+        pass
+
+    def export(self, dbfile='db.scehma', schema_only=False):
+        """
+        Exports whole database in a file with SQL statements. This
+        file can then be taken anywhere and database can be reconstructed
+        by following command :
+            $ sqlite3 my_backup.db < db.schema
+
+        Parameters
+        -----------
+        dbfile : str
+            Path and filename to be dumped. Defaults to db.schema
+        schema_only : bool
+            Dumps only schema and not the data when set to True ; default False.
+        """
+
+        with open(dbfile, 'w+') as fp:
+            for line in self.connection.iterdump():
+                if schema_only and line.startswith('INSERT INTO'):
+                    continue
+                fp.write('%s\n' % line)
 
     def init_db(self, schema):
         '''
