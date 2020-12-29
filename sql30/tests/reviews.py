@@ -6,6 +6,7 @@ import unittest
 from sql30 import db
 
 DB_NAME = './review.db'
+BACKUP_DB = './review_backup.db'
 
 
 class Reviews(db.Model):
@@ -107,11 +108,22 @@ class ReviewTest(unittest.TestCase):
         db.commit()
         self.assertFalse(db.read(rid=2))
 
+    def _test_export(self):
+        db = Reviews()
+        db.export(dbfile=BACKUP_DB) 
+
     def test_CRUD(self):
         self._test_CREATE()
         self._test_READ()
         self._test_UPDATE()
+        
+        # Export file and ensure it exists.
+        self._test_export()
+        assert os.path.exists(BACKUP_DB)
+        os.remove(BACKUP_DB)
+
         self._test_DELETE()
 
     def tearDown(self):
         os.remove(DB_NAME)
+        

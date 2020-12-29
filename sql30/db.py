@@ -135,6 +135,27 @@ class Model(object):
         """
         return self
 
+    def export(self, dbfile='db.scehma', schema_only=False):
+        """
+        Exports whole database in a file with SQL statements. This
+        file can then be taken anywhere and database can be reconstructed
+        by following command :
+            $ sqlite3 my_backup.db < db.schema
+
+        Parameters
+        -----------
+        dbfile : str
+            Path and filename to be dumped. Defaults to db.schema
+        schema_only : bool
+            Dumps only schema and not the data when set to True ; default False.
+        """
+
+        with open(dbfile, 'w+') as fp:
+            for line in self.connection.iterdump():
+                if schema_only and line.startswith('INSERT INTO'):
+                    continue
+                fp.write('%s\n' % line)
+
     def init_db(self, schema):
         '''
         Initializes Databse using schema by creating tables specified in
