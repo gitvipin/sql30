@@ -1,6 +1,10 @@
-#!/bin/env/python
+#!/usr/bin/env python
+# Copyright (c) 2020 Vipin Sharma. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2 License
+# The full license information can be found in LICENSE.txt
+# in the root directory of this project.
 '''
-A simple interface for interacting with SQLite example.
+A simple ORM for interacting with SQLite database.
 '''
 import logging
 import os
@@ -134,6 +138,52 @@ class Model(object):
             db.create(...)
         """
         return self
+
+    @property
+    def table_names(self):
+        """ Returns list of tables in sqlite_master database. """
+        records = self.read('sqlite_master', type='table', include_header=True)
+        nindex = records[0].index('name')
+        return [x[nindex] for x in records[1:]]
+
+    def fetch_schema(self):
+        """ Fetches DB Schema and populates table info """
+        records = self.read('sqlite_master', type='table', include_header=True)
+        nidx = records[0].index('name')
+        sidx = records[0].index('sql')
+
+        for table_info in records[1:]:
+            tbl_name = table_info[nidx]
+            tbl_sql = table_info[sidx]
+
+            schema = {}
+            schema['name'] = tbl_name
+            fields = {}
+            tbl_sql = tbl_sql.splitlines()
+            tbl_sql = [str(x.strip()) for x in tbl_sql]
+            for line in tbl_sql:
+                if 'CREATE TABLE' in line:
+                    continue
+                elif line == ')':
+                    continue
+                elif line.startswith('PRIMARY KEY'):
+                    start , end = line.index('('), line.index(')')
+                    schema['primary_key'] = line[start+1:end]
+                else:
+                    line = line.split()
+                    var = line[0]
+                    if 'VARCHAR' in line[1]:
+                        fields[var] = 'text'
+                    elif 'INTEGER' in line[1]:
+                        fields[var] = 'int'
+
+            schema['fields'] = fields
+            _table = [x for x in self.DB_SCHEMA['tables'] if x['name'] == tbl_name]
+            assert len(_table) <= 1
+            if _table:
+                _table[0].update(schema)
+            else:
+                self.DB_SCHEMA['tables'].append(schema)
 
     def export(self, dbfile='db.scehma', schema_only=False):
         """
