@@ -1,17 +1,13 @@
-let mountains = [
-  { name: "Monte Falco", height: 1658, place: "Parco Foreste Casentinesi" },
-  { name: "Monte Falterona", height: 1654, place: "Parco Foreste Casentinesi" },
-  { name: "Poggio Scali", height: 1520, place: "Parco Foreste Casentinesi" },
-  { name: "Pratomagno", height: 1592, place: "Parco Foreste Casentinesi" },
-  { name: "Monte Amiata", height: 1738, place: "Siena" }
-];
 
 // const userAction = async () => {
   async function userAction() {
-  const response = await fetch('http://localhost:5649/tables/otp_code');
-  const myJson = await response.json(); //extract JSON from the http response
-  console.log(myJson);
-  return myJson
+    try {
+      let res = await fetch('http://localhost:5649/tables/otp_code');
+      let myJson = await res.json(); //extract JSON from the http response
+      return myJson;
+    } catch (error) {
+      console.log(myJson);
+    }
 }
 
 
@@ -27,7 +23,8 @@ function generateTableHead(table, data) {
 }
 
 
-function generateTable(table, data) {
+async function generateTable(table, nodata) {
+  let data = await userAction();
   for (let element of data) {
     let row = table.insertRow();
     for (key in element) {
@@ -38,8 +35,8 @@ function generateTable(table, data) {
   }
 }
 
+
 let table = document.querySelector("table");
-let data = Object.keys(mountains[0]);
-// let records = userAction();
-generateTable(table, mountains);
+let data = Object.keys(["header1", "header2"]);
+generateTable(table, data);
 generateTableHead(table, data);
