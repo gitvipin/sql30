@@ -1,6 +1,13 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.1.8 and 0.1.7
+--------------
+- Allow export of database as an SQL statement file.
+- Allow SQL schema export.
+- Allow users to work on non SQL30 generated databases. 
+- A command line utility for SQL30 operations above.
+
 0.1.6 (Minor)
 --------------
 - Add APIs for miscellaneous operations around - count, min, max, avg
