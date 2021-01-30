@@ -159,7 +159,10 @@ class Model(object):
             schema = {}
             schema['name'] = tbl_name
             fields = {}
-            tbl_sql = tbl_sql.splitlines()
+            fstart = tbl_sql.index('(')
+            fend = tbl_sql.index(')')
+            tbl_sql = tbl_sql[fstart+1:fend].split(',')
+            #tbl_sql = tbl_sql.splitlines()
             tbl_sql = [str(x.strip()) for x in tbl_sql]
             for line in tbl_sql:
                 if 'CREATE TABLE' in line:
@@ -172,9 +175,9 @@ class Model(object):
                 else:
                     line = line.split()
                     var = line[0]
-                    if 'VARCHAR' in line[1]:
+                    if line[1] in ['VARCHAR', 'text']:
                         fields[var] = 'text'
-                    elif 'INTEGER' in line[1]:
+                    elif line[1] in ['INTEGER', 'int']:
                         fields[var] = 'int'
 
             schema['fields'] = fields
