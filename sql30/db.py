@@ -242,6 +242,16 @@ class Model(object):
                                  type='table',
                                  name=tbl_name) else False
 
+    def _add_col_order(self, tbl_schema):
+        if 'col_order' in tbl_schema:
+            return
+        tbl_schema['col_order'] = [k for k, _ in tbl_schema['fields'].items()]
+
+    def _get_col_order(self, tbl, schema=None):
+        """ Returns columns in order they were created. """
+        tbl_schema = schema or self._get_schema(tbl)
+        return tbl_schema['col_order']
+
     def create_table(self, schema):
         """
         Creates Table into the database represented by database here using
@@ -263,12 +273,12 @@ class Model(object):
                 log.debug("Table %s exists, skipped from creation", tbl_name)
             return
 
+        self._add_col_order(schema)
         cols = []
 
-        # Python dictionaries aren't guaranted to be read back in same order
-        # as they are declared. It is for this reason we ask for column_order,
-        # in schema declaration
-        for cname, ctype in schema['fields'].items():
+        _fields = schema['fields']
+        for cname in self._get_col_order(tbl_name, schema):
+            ctype = _fields[cname]
             _col = '%s %s' % (cname, ctype)
             if cname == pkey:
                 _col += ' PRIMARY KEY'
@@ -289,8 +299,7 @@ class Model(object):
     def _get_fields(self, tbl_name):
         """
         """
-        _schema = self._get_schema(tbl_name)
-        return [key for key, _ in _schema['fields'].items()]
+        return self._get_col_order(tbl_name)
 
     def _form_constraints(self, _separator='and', kwargs=None):
         def is_range(x): return isinstance(x, tuple) or isinstance(x, list)
@@ -321,18 +330,11 @@ class Model(object):
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
         self._validate_bfr_write(tbl, kwargs)
-        tbl_schema = self._get_schema(tbl)
 
-        # Python must be greater than 3.6 for this to work. Python 3.6 onwards
-        # guarantes that keys of a dictionry by default come in same order as
-        # they were declared. Here, we simply form an ordered tuple of values
-        # in the same order as the columns were declared in schema.
-        values = [kwargs.get(field, '') for field, _
-                  in tbl_schema['fields'].items()]
+        values = [kwargs.get(field, '') for field in self._get_fields(tbl)]
 
-        self.cursor.execute('INSERT INTO %s VALUES (%s)' % (tbl,
-                            ','.join(['?'] * len(values))),
-                            values)
+        cmnd = 'INSERT INTO %s VALUES (%s)' % (tbl, ','.join(['?'] * len(values)))
+        self.cursor.execute(cmnd, values)
 
     def read(self, tbl=None, include_header=False, **kwargs):
         """
