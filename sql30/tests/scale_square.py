@@ -16,6 +16,7 @@ class Config(db.Model):
         'tables': [
             {
                 'name': TABLE,
+                'col_order': ['num', 'square'],
                 'fields': {
                     'num': 'int',
                     'square': 'int',
