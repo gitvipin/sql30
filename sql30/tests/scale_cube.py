@@ -65,9 +65,10 @@ class ScaleTest(unittest.TestCase):
 
         # read all the records and check that entries were made for all
         # of them.
-        recs = db.read()
+        recs = db.read(include_header=True)
+        numIdx = recs[0].index('num')
         # print (sorted(recs))
-        keys = [x for x, _ in recs]
+        keys = [x[numIdx] for x in recs[1:]]
         # print(sorted(keys))
         assert all([x in keys for x in range(self.CUBE_NUM_UPTO)])
 
