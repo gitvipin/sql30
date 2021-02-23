@@ -1,6 +1,14 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.1.9
+--------------
+- Port sql30 to Python <= 3.6 and Python 2 as well.
+- SQL30 is available on Python 2 as well.
+- Add MANIFEST file for python2.
+- Allow users to specify order in which table columns should be created.
+  This allows users to make behavior predictable on Python 2 and Python3.
+
 0.1.8 and 0.1.7
 --------------
 - Allow export of database as an SQL statement file.
