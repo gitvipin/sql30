@@ -267,13 +267,13 @@ class Model(object):
         """
         tbl_name = schema['name']
         pkey = schema.get('primary_key', None)
+        self._add_col_order(schema)
 
         if self.table_exists(tbl_name):
             if self.verbose:
                 log.debug("Table %s exists, skipped from creation", tbl_name)
             return
 
-        self._add_col_order(schema)
         cols = []
 
         _fields = schema['fields']
