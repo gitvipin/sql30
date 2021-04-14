@@ -50,7 +50,7 @@ class SQL30Handler(BaseHTTPRequestHandler):
             return json.dumps(records)
 
 
-def run(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port=8008):
+def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port=8008):
     global DBPATH
     DBPATH = db_path
 
@@ -63,6 +63,6 @@ def run(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port=8008):
 
 if __name__ == "__main__":
     if len(argv) >= 2:
-        run(argv[1], port=int(argv[2]))
+        start_server(argv[1], port=int(argv[2]))
     else:
-        run(None)
+        start_server(None)
