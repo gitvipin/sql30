@@ -1,6 +1,13 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.0
+--------------
+- Allow users to redirect db files into a directory based on SQL30_DB_DIR .
+- Fix command line utility to start server on a port to serve data of tables.
+- Include sanity test into the unit tests which are gating tests for release of sql30.
+- Minor styling fixes.
+
 0.1.9
 --------------
 - Port sql30 to Python <= 3.6 and Python 2 as well.
