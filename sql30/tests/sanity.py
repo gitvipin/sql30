@@ -95,9 +95,6 @@ class TestReviews(object):
 
         # TEST CASE 3: Delete a record with primary key = 2
         where = {'rid': 2}
-        values = {
-                'rating': 2
-                }
 
         print("Updating record with id '2'")
         db.update(tbl, condition=where,
