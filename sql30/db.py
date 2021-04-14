@@ -24,7 +24,9 @@ class Model(object):
             }
     VALIDATE_BEFORE_WRITE = False
 
-    # Location where database files should be saved.
+    # Location where database files would be saved unless
+    # 1) path is relative (i.e. has path separator in it) OR
+    # 2) SQL30_DB_DIR environment variable is set.
     DB_FILE_LOC = '/opt/sql30/'
 
     # Initialize global connection to sqlite database.
@@ -35,7 +37,17 @@ class Model(object):
         self._db_loc = kwargs.get('db_loc', None) or self.DB_FILE_LOC
 
         self._db = kwargs.get('db_name', None) or self.DB_SCHEMA['db_name']
-        if PATHSEP not in self._db:
+
+        _db_global_path = os.environ.get('SQL30_DB_DIR', None)
+        if _db_global_path:
+            # If SQL30_DB_DIR is set, it supersedes all request for DB file
+            # location. All DB files whether given w.r.t relative path or
+            # just filename would always goto this directory.
+            _, self._db = os.path.split(self._db)
+            self._db = os.path.join(_db_global_path, self._db)
+            if not os.path.exists(_db_global_path):
+                os.makedirs(_db_global_path)
+        elif PATHSEP not in self._db:
             if not os.path.exists(self.db_loc):
                 os.makedirs(self.db_loc)
             self._db = os.path.join(self.db_loc, self._db)
@@ -162,7 +174,6 @@ class Model(object):
             fstart = tbl_sql.index('(')
             fend = tbl_sql.index(')')
             tbl_sql = tbl_sql[fstart+1:fend].split(',')
-            #tbl_sql = tbl_sql.splitlines()
             tbl_sql = [str(x.strip()) for x in tbl_sql]
             for line in tbl_sql:
                 if 'CREATE TABLE' in line:
@@ -170,7 +181,7 @@ class Model(object):
                 elif line == ')':
                     continue
                 elif line.startswith('PRIMARY KEY'):
-                    start , end = line.index('('), line.index(')')
+                    start, end = line.index('('), line.index(')')
                     schema['primary_key'] = line[start+1:end]
                 else:
                     line = line.split()
