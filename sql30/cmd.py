@@ -8,10 +8,12 @@ A simple REST interface for reading SQLite Database.
 '''
 
 import argparse
+import os
 import signal
 import sys
 
 from sql30 import db
+from sql30 import api
 
 
 class DummyDB(db.Model):
@@ -22,12 +24,12 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-d', '--database', help="Name of database.")
+        '-d', '--database', help="Name of database.", required=True)
     parser.add_argument(
         '-e', '--export', action='store_true',
         help="Export database as SQL schema.")
     parser.add_argument(
-        '-l', '--location', action="store", required=True,
+        '-l', '--location', action="store",
         help="Location of DB file.")
     parser.add_argument(
         '-o', '--output', default='db.schema',
@@ -43,14 +45,22 @@ def main():
 
     args = parser.parse_args()
 
-    verbose = bool(args.verbose)
+    _ = bool(args.verbose)
 
-    db = DummyDB(db_name=args.location)
+    if args.location:
+        db_path = os.path.join(args.location, args.database)
+    else:
+        db_path = args.database
+
+    db = DummyDB(db_name=db_path)
     db.fetch_schema()
 
-    import pdb ; pdb.set_trace()
     if args.export:
         db.export(dbfile=args.output)
+
+    if args.server:
+        assert int(args.port), "None or invalid port"
+        api.start_server(db_path=db_path, port=int(args.port))
 
     def signal_handler(sig, frame):
         # TODO :
