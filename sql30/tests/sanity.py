@@ -4,10 +4,14 @@ A simple sanity test for sql30 module.
 
 If this module runs on your platform ( UNIX, WINDOWS, ESX etc.) you can use
 this module.
+
+USAGE: 
+     python -msql30.tests.sanity
 '''
 import os
 import sqlite3
 import sys
+import unittest
 
 from sql30 import db
 
@@ -36,8 +40,8 @@ class Reviews(db.Model):
 # unittest module. On some platforms like ESX, if unittest module is
 # not ported yet, this sanity check will fail. To handle that, it is
 # shown as pure python test case.
-# class TestReviews(unittest.TestCase):
-class TestReviews(object):
+class TestReviews(unittest.TestCase):
+# class TestReviews(object):
 
     DB_NAME = './test_reviews.db'
 
