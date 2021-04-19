@@ -30,7 +30,7 @@ class SQL30Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self._set_headers()
         if not self.path or self.path == '/':
-            response = json.dumps({'hello': 'world', 'received': 'ok'})
+            response = json.dumps({'message': 'Welcome to SQL30', 'staus': 200})
         else:
             response = self._get_records()
 
@@ -46,7 +46,7 @@ class SQL30Handler(BaseHTTPRequestHandler):
             path = self.path.split('/')
             tidx = path.index('tables')
             dummydb.table = path[tidx+1]
-            records = dummydb.read()
+            records = dummydb.read(include_header=True)
             return json.dumps(records)
 
 
