@@ -18,7 +18,6 @@ DBPATH = None
 
 class SQL30Handler(BaseHTTPRequestHandler):
     def _set_headers(self):
-        self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
@@ -28,12 +27,15 @@ class SQL30Handler(BaseHTTPRequestHandler):
 
     # GET sends back a Hello world message
     def do_GET(self):
-        self._set_headers()
         if not self.path or self.path == '/':
-            response = json.dumps({'message': 'Welcome to SQL30', 'staus': 200})
+            response, error = json.dumps({'message': 'Welcome to SQL30', 'staus': 200}), None
+        elif '/tables' not in self.path:
+            response, error = "/tables/ is missing from path", True
         else:
-            response = self._get_records()
+            response, error = self._get_records()
 
+        self.send_response(200 if not error else 400)
+        self._set_headers()
         response = bytes(response, 'utf-8')
         self.wfile.write(response)
 
@@ -42,12 +44,18 @@ class SQL30Handler(BaseHTTPRequestHandler):
             pass
 
         with DummyDB(db_name=DBPATH) as dummydb:
-            dummydb.fetch_schema()
-            path = self.path.split('/')
-            tidx = path.index('tables')
-            dummydb.table = path[tidx+1]
-            records = dummydb.read(include_header=True)
-            return json.dumps(records)
+            try:
+                dummydb.fetch_schema()
+                path = self.path.split('/')
+                try:
+                    tidx = path.index('tables')
+                except Exception:
+                    return "Invalid path", True
+                dummydb.table = path[tidx+1]
+                records = dummydb.read(include_header=True)
+                return json.dumps(records), None
+            except Exception as err:
+                return str(err), str(err)
 
 
 def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port=8008):
