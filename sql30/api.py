@@ -9,7 +9,15 @@ This module serves SQLITE database data as JSON through HTTP server.
 import json
 
 from sys import argv
-from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+try:
+    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+except (ModuleNotFoundError, ImportError):
+    # python 3.6 and before.
+    import socketserver
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    class ThreadingHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
+        pass
+
 
 from sql30 import db
 
