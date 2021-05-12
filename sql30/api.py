@@ -7,24 +7,32 @@
 This module serves SQLITE database data as JSON through HTTP server.
 """
 import json
+import platform
 
 from sys import argv
+from http.server import SimpleHTTPRequestHandler
+
+IS_PYTHON2 = not platform.python_version().startswith('3')
+
+if IS_PYTHON2:# Python 2.0
+    class ModuleNotFoundError(Exception):
+        pass
+
 try:
-    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+    from http.server import ThreadingHTTPServer
 except (ModuleNotFoundError, ImportError):
     # python 3.6 and before.
     import socketserver
-    from http.server import HTTPServer, BaseHTTPRequestHandler
+    from http.server import HTTPServer
     class ThreadingHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
         pass
-
 
 from sql30 import db
 
 DBPATH = None
 
 
-class SQL30Handler(BaseHTTPRequestHandler):
+class SQL30Handler(SimpleHTTPRequestHandler):
     def _set_headers(self):
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -44,7 +52,7 @@ class SQL30Handler(BaseHTTPRequestHandler):
 
         self.send_response(200 if not error else 400)
         self._set_headers()
-        response = bytes(response, 'utf-8')
+        response = bytes(response, 'utf-8') if not IS_PYTHON2 else response
         self.wfile.write(response)
 
     def _get_records(self):
