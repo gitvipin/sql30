@@ -1,6 +1,12 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.1
+--------------
+- Handle Exception for SimpleHTTPRequestHandler across Python2, Python > 3.6 and python > 3.6
+- Keyboard interrupt handler in API server.
+
+
 0.2.0
 --------------
 - Allow users to redirect db files into a directory based on SQL30_DB_DIR .
