@@ -20,6 +20,7 @@ class DummyDB(db.Model):
     pass
 
 
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -60,13 +61,7 @@ def main():
 
     if args.server:
         assert int(args.port), "None or invalid port"
-        api.start_server(db_path=db_path, port=int(args.port))
-
-    def signal_handler(sig, frame):
-        # TODO :
-        sys.exit(0)
-
-    signal.signal(signal.SIGINT, signal_handler)
+        server = api.start_server(db_path=db_path, port=int(args.port))
 
 
 if __name__ == '__main__':

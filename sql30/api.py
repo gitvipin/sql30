@@ -8,9 +8,11 @@ This module serves SQLITE database data as JSON through HTTP server.
 """
 import json
 import platform
+import signal
+import sys
 
 from sys import argv
-from http.server import SimpleHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 
 IS_PYTHON2 = not platform.python_version().startswith('3')
 
@@ -32,7 +34,7 @@ from sql30 import db
 DBPATH = None
 
 
-class SQL30Handler(SimpleHTTPRequestHandler):
+class SQL30Handler(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_header('Content-type', 'application/json')
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -79,10 +81,15 @@ def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port
     DBPATH = db_path
 
     server_address = ('', port)
-    httpd = server(server_address, handler)
+    server = server(server_address, handler)
 
+    def signal_handler(sig, frame):
+        print('Closing server..')
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
     print('Starting httpd on port %d...' % port)
-    httpd.serve_forever()
+    server.serve_forever()
 
 
 if __name__ == "__main__":
