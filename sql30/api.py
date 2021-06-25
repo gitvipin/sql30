@@ -16,7 +16,9 @@ from http.server import BaseHTTPRequestHandler
 
 IS_PYTHON2 = not platform.python_version().startswith('3')
 
-if IS_PYTHON2:# Python 2.0
+try:
+    _ = ModuleNotFoundError
+except Exception:   # Python 3.6 and before.
     class ModuleNotFoundError(Exception):
         pass
 
