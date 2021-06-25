@@ -110,8 +110,14 @@ class Model(object):
         explicitly.
         """
         if not self._conn:
-            self._conn = sqlite3.connect(self._db)
+            self._conn = self.get_conn_handle()
             self._cursor = self._conn.cursor()
+
+    def get_conn_handle(self):
+        """
+        Returns new Connection handle to Database.
+        """
+        return sqlite3.connect(self._db)
 
     def commit(self):
         if self.verbose:
@@ -131,7 +137,7 @@ class Model(object):
 
     def __enter__(self):
         assert not self._context_conn, "nested context not allowed"
-        self._context_conn = sqlite3.connect(self._db)
+        self._context_conn = self.get_conn_handle()
         self._context_cursor = self._context_conn.cursor()
         return self
 
