@@ -32,6 +32,9 @@ class Model(object):
     # Initialize global connection to sqlite database.
     INIT_CONNECTION = True
 
+    # Timeout for connection
+    TIMEOUT = None  # default is 5 seconds, coming from python.
+
     def __init__(self, **kwargs):
         # set default DB file location
         self._db_loc = kwargs.get('db_loc', None) or self.DB_FILE_LOC
@@ -64,6 +67,8 @@ class Model(object):
         self._context_conn = None
         self._context_cursor = None
 
+        self._timeout = kwargs.get('timeout', None)
+
         if self.INIT_CONNECTION:
             self.init_connection()
 
@@ -75,6 +80,10 @@ class Model(object):
     @property
     def table(self):
         return self._table
+
+    @property
+    def timeout(self):
+        return self._timeout or self.TIMEOUT
 
     @table.setter
     def table(self, val):
@@ -116,8 +125,15 @@ class Model(object):
     def get_conn_handle(self):
         """
         Returns new Connection handle to Database.
+
+        When using this ORM with other than SQLITE3 databases, for example
+        PostgresSQL, users can just simply overwrite this method and can
+        still using regular CRUD operations.
         """
-        return sqlite3.connect(self._db)
+        if not self.timeout:
+            return sqlite3.connect(self._db)
+        else:
+            return sqlite3.connect(self._db, timeout=self.timeout)
 
     def commit(self):
         if self.verbose:
