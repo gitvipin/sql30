@@ -25,6 +25,9 @@ class Config(db.Model):
     VALIDATE_BEFORE_WRITE = True
     INIT_CONNECTION = True
 
+class ConfigTimeout(Config):
+    TIMEOUT = 10
+
 
 class ContextTest(unittest.TestCase):
 
@@ -75,6 +78,16 @@ class ContextTest(unittest.TestCase):
 
     def test_read(self):
         with Config() as db:
+            recs = db.read(tbl=db.TABLE, num=-1)
+            self.assertEqual(len(recs), 1)
+
+        # Test if timeout parameter is accepted.
+        with Config(timeout=15) as db:
+            recs = db.read(tbl=db.TABLE, num=-1)
+            self.assertEqual(len(recs), 1)
+
+        # Test if timeout parameter is accepted.
+        with ConfigTimeout() as db:
             recs = db.read(tbl=db.TABLE, num=-1)
             self.assertEqual(len(recs), 1)
 
