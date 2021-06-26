@@ -1,11 +1,20 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.2
+--------------
+- Allow users to specify connection timeout. Default connection timeout through
+  sqlite3 module is 5 seconds. Users can override it at schema level or can alter
+  it for individual instance.
+- Fix for 'ModuleNotFoundError' in API server for Python < 3.5
+- Refactoring for support to PostgresSQL (through connection with 3rd party connector)
+  e.g. Users can use https://pypi.org/project/psycopg2/ to connect to PostgresSQL database
+  and override `get_conn_handle` in Schema class and same code shall work for PostgresSQL.
+
 0.2.1
 --------------
 - Handle Exception for SimpleHTTPRequestHandler across Python2, Python > 3.6 and python > 3.6
 - Keyboard interrupt handler in API server.
-
 
 0.2.0
 --------------
