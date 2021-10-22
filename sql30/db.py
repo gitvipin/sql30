@@ -369,25 +369,50 @@ class Model(object):
         cmnd = 'INSERT INTO %s VALUES (%s)' % (tbl, ','.join(['?'] * len(values)))
         self.cursor.execute(cmnd, values)
 
-    def read(self, tbl=None, include_header=False, **kwargs):
+    def read(self, tbl=None, include_header=False, limit=None, **kwargs):
         """
         Read from Table all the records with requested constraints.
         """
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
+
+        limit_query = 'LIMIT %s' % limit if limit is not None else ''
+
+        if kwargs:
+            constraints = self._form_constraints(kwargs=kwargs)
+            query = 'SELECT * FROM %s WHERE %s %s' % (tbl, constraints, limit_query)
+            self.cursor.execute(query, kwargs)
+        else:
+            query = 'SELECT * FROM %s %s' % (tbl, limit_query)
+            self.cursor.execute(query, kwargs)
+
+        result = self.cursor.fetchall()  # TODO : Can be inefficient at scale if there's not limit.
+        if include_header:
+            header = [d[0] for d in self.cursor.description]
+            result.insert(0, header)
+
+        return result
+
+    def readFirst(self, tbl=None, include_header=False, **kwargs):
+        """
+        Read from Table the first record with requested constraints.
+        """
+        tbl = tbl or self.table
+        assert tbl, "No table set for operation"
+
+
         if kwargs:
             constraints = self._form_constraints(kwargs=kwargs)
             query = 'SELECT * FROM %s WHERE %s' % (tbl, constraints)
             self.cursor.execute(query, kwargs)
         else:
-            query = 'SELECT * FROM %s ' % tbl
+            query = 'SELECT * FROM %s' % (tbl)
             self.cursor.execute(query, kwargs)
 
-        result = self.cursor.fetchall()  # TODO : Can be inefficient at scale.
+        result = self.cursor.fetchone()
         if include_header:
             header = [d[0] for d in self.cursor.description]
-            result.insert(0, header)
-
+            return result, header
         return result
 
     def update(self, tbl=None, condition={}, **kwargs):
