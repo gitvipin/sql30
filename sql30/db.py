@@ -334,7 +334,7 @@ class Model(object):
         """
         return self._get_col_order(tbl_name)
 
-    def _form_constraints(self, _separator='and', kwargs=None):
+    def __form_constraints(self, _separator='and', kwargs=None):
         def is_range(x): return isinstance(x, tuple) or isinstance(x, list)
         constraints = []
         for key, val in kwargs.items():
@@ -344,6 +344,11 @@ class Model(object):
                 cparam = '%s=:%s' % (key, key)
             constraints.append(cparam)
         return (' %s ' % _separator).join(constraints)
+
+    def _form_constraints(self, _separator='and', kwargs=None):
+        if not kwargs:
+            return ''
+        return 'WHERE ' + self.__form_constraints(_separator=_separator, kwargs=kwargs)
 
     def _validate_bfr_write(self, tbl, kwargs):
         if not self.VALIDATE_BEFORE_WRITE:
@@ -375,14 +380,9 @@ class Model(object):
         """
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
-        if kwargs:
-            constraints = self._form_constraints(kwargs=kwargs)
-            query = 'SELECT * FROM %s WHERE %s' % (tbl, constraints)
-            self.cursor.execute(query, kwargs)
-        else:
-            query = 'SELECT * FROM %s ' % tbl
-            self.cursor.execute(query, kwargs)
-
+        constraints = self._form_constraints(kwargs=kwargs)
+        query = 'SELECT * FROM %s %s' % (tbl, constraints)
+        self.cursor.execute(query, kwargs)
         result = self.cursor.fetchall()  # TODO : Can be inefficient at scale.
         if include_header:
             header = [d[0] for d in self.cursor.description]
@@ -395,9 +395,9 @@ class Model(object):
         assert tbl, "No table set for operation"
         msg = "With no/empty condition, WHERE clause cannot be set for UPDATE"
         assert condition, msg
+        values = self.__form_constraints(_separator=',', kwargs=kwargs)
         cond = self._form_constraints(kwargs=condition)
-        values = self._form_constraints(_separator=',', kwargs=kwargs)
-        query = 'UPDATE %s SET %s WHERE %s' % (tbl, values, cond)
+        query = 'UPDATE %s SET %s %s' % (tbl, values, cond)
         kwargs.update(condition)
         self.cursor.execute(query, kwargs)
 
@@ -405,19 +405,14 @@ class Model(object):
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
         constraints = self._form_constraints(kwargs=kwargs)
-        query = 'DELETE FROM %s WHERE %s' % (tbl, constraints)
+        query = 'DELETE FROM %s %s' % (tbl, constraints)
         self.cursor.execute(query, kwargs)
 
     def _misc(self, method, field, tbl=None, **kwargs):
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
         constraints = self._form_constraints(kwargs=kwargs)
-        if constraints:
-            query = 'SELECT %s(%s) FROM %s WHERE %s' % (method, field,
-                                                        tbl, constraints)
-        else:
-            query = 'SELECT %s(%s) FROM %s ' % (method, field, tbl)
-
+        query = 'SELECT %s(%s) FROM %s %s' % (method, field, tbl, constraints)
         self.cursor.execute(query, kwargs)
         try:
             return self.cursor.fetchone()[0]
