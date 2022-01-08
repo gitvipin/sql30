@@ -380,8 +380,14 @@ class Model(object):
         """
         tbl = tbl or self.table
         assert tbl, "No table set for operation"
+
+        _limit = kwargs.pop('LIMIT', None)
         constraints = self._form_constraints(kwargs=kwargs)
         query = 'SELECT * FROM %s %s' % (tbl, constraints)
+
+        if _limit is not None:
+            query += 'LIMIT %s' % _limit
+
         self.cursor.execute(query, kwargs)
         result = self.cursor.fetchall()  # TODO : Can be inefficient at scale.
         if include_header:

@@ -84,6 +84,10 @@ class TestReviews(unittest.TestCase):
         results = db.read(tbl, rid=1)
         print(results)
 
+        # TEST CASE : check LIMIT keyword works.
+        recs = db.read(tbl, LIMIT=1)
+        assert len(recs) == 1, "LIMIT 1 didn't give 1 row"
+
         # TEST CASE 1 : Error when trying to add a record with same primary key
         try:
             print("Trying to create a new record with duplicate id 1")
