@@ -1,6 +1,14 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.3
+--------------
+- Allow LIMIT to be specified in read operations.
+- Allow OFFSET to be specified in read operation.
+- This is helpful when there are high number of records are expected.
+  SELECT * from table LIMIT 100 OFFSET 10;
+    would give only max 100 records from 'table' starting from row 10.
+
 0.2.2
 --------------
 - Allow users to specify connection timeout. Default connection timeout through
