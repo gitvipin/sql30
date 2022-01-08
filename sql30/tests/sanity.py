@@ -88,6 +88,10 @@ class TestReviews(unittest.TestCase):
         recs = db.read(tbl, LIMIT=1)
         assert len(recs) == 1, "LIMIT 1 didn't give 1 row"
 
+        # TEST CASE : check LIMIT keyword works.
+        recs = db.read(tbl, LIMIT=1, OFFSET=2)
+        assert len(recs) == 0, "LIMIT 1 OFFSET 2 didn't give 0 row"
+
         # TEST CASE 1 : Error when trying to add a record with same primary key
         try:
             print("Trying to create a new record with duplicate id 1")

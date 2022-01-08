@@ -382,11 +382,14 @@ class Model(object):
         assert tbl, "No table set for operation"
 
         _limit = kwargs.pop('LIMIT', None)
+        _offset = kwargs.pop('OFFSET', None)
         constraints = self._form_constraints(kwargs=kwargs)
         query = 'SELECT * FROM %s %s' % (tbl, constraints)
 
         if _limit is not None:
-            query += 'LIMIT %s' % _limit
+            query += ' LIMIT %s ' % _limit
+        if _offset is not None:
+            query += ' OFFSET %s ' % _offset
 
         self.cursor.execute(query, kwargs)
         result = self.cursor.fetchall()  # TODO : Can be inefficient at scale.
