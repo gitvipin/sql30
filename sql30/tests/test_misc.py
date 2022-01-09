@@ -24,6 +24,7 @@ class Square(db.Model):
         }
     VALIDATE_BEFORE_WRITE = True
     INIT_CONNECTION = True
+    DEFAULT_TABLE = 'square'
 
 
 class MiscTest(unittest.TestCase):
@@ -60,6 +61,13 @@ class MiscTest(unittest.TestCase):
 
             # Number of records where 4 <= square <= 9 should be 1.
             self.assertEqual(db.count(square=[4, 9]), 2)
+
+    def test_no_table_set(self):
+        """
+        Tests for ability to read from default table when no table set.
+        """
+        with Square() as db:
+            self.assertEqual(db.count(), 3)
 
     def test_min(self):
         """

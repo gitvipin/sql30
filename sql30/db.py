@@ -35,6 +35,9 @@ class Model(object):
     # Timeout for connection
     TIMEOUT = None  # default is 5 seconds, coming from python.
 
+    # Default Table
+    DEFAULT_TABLE = None
+
     def __init__(self, **kwargs):
         # set default DB file location
         self._db_loc = kwargs.get('db_loc', None) or self.DB_FILE_LOC
@@ -79,7 +82,7 @@ class Model(object):
 
     @property
     def table(self):
-        return self._table
+        return self._table or self.DEFAULT_TABLE
 
     @property
     def timeout(self):
