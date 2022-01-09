@@ -1,6 +1,10 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.4
+--------------
+- Allow DEFAULT_TABLE to be set in database schema itself.
+
 0.2.3
 --------------
 - Allow LIMIT to be specified in read operations.
