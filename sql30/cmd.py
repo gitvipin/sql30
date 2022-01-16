@@ -30,6 +30,9 @@ def main():
         '-e', '--export', action='store_true',
         help="Export database as SQL schema.")
     parser.add_argument(
+        '-j', '--json', action="store_true",
+        help="Start server for JSON response.")
+    parser.add_argument(
         '-l', '--location', action="store",
         help="Location of DB file.")
     parser.add_argument(
@@ -43,6 +46,9 @@ def main():
     parser.add_argument(
         '-v', '--verbose', action="store_true",
         help="Verbose mode")
+    parser.add_argument(
+        '-x', '--html', action="store_true",
+        help="Start server for HTML response.")
 
     args = parser.parse_args()
 
@@ -60,8 +66,10 @@ def main():
         db.export(dbfile=args.output)
 
     if args.server:
+        json_output = False if args.html else True
         assert int(args.port), "None or invalid port"
-        server = api.start_server(db_path=db_path, port=int(args.port))
+        server = api.start_server(db_path=db_path, port=int(args.port),
+                                  json_output=json_output)
 
 
 if __name__ == '__main__':

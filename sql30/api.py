@@ -7,6 +7,7 @@
 This module serves SQLITE database data as JSON through HTTP server.
 """
 import json
+import os
 import platform
 import signal
 import sys
@@ -37,8 +38,12 @@ DBPATH = None
 
 
 class SQL30Handler(BaseHTTPRequestHandler):
+
+    def get_content_type(self):
+        return 'application/json'
+
     def _set_headers(self):
-        self.send_header('Content-type', 'application/json')
+        self.send_header('Content-type', self.get_content_type())
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
@@ -48,7 +53,7 @@ class SQL30Handler(BaseHTTPRequestHandler):
     # GET sends back a Hello world message
     def do_GET(self):
         if not self.path or self.path == '/':
-            response, error = json.dumps({'message': 'Welcome to SQL30', 'staus': 200}), None
+            response, error = json.dumps(self.welcome()), None
         elif '/tables' not in self.path:
             response, error = "/tables/ is missing from path", True
         else:
@@ -58,6 +63,9 @@ class SQL30Handler(BaseHTTPRequestHandler):
         self._set_headers()
         response = bytes(response, 'utf-8') if not IS_PYTHON2 else response
         self.wfile.write(response)
+
+    def welcome(self):
+        return {'message': 'Welcome to SQL30', 'staus': 200}
 
     def _get_records(self):
         class DummyDB(db.Model):
@@ -73,16 +81,51 @@ class SQL30Handler(BaseHTTPRequestHandler):
                     return "Invalid path", True
                 dummydb.table = path[tidx+1]
                 records = dummydb.read(include_header=True)
-                return json.dumps(records), None
+                return self.format_output(records), None
             except Exception as err:
                 return str(err), str(err)
 
+    def format_output(self, data):
+        return json.dumps(data)
 
-def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port=8008):
+class SQL30HandlerHTML(SQL30Handler):
+
+    def welcome(self):
+        return '''
+        <!DOCTYPE html>
+        <html>
+            <body>
+            <h1>Welcome to SQL30</h1>
+            </body>
+        </html>
+        '''
+    def get_content_type(self):
+        return 'text/html; charset=UTF-8'
+
+    def format_output(self, records):
+        fpath = os.path.dirname(os.path.abspath(__file__))
+        fpath = os.path.join(fpath, 'templates/index.html')
+        html_content = None
+        with open(fpath, 'r') as fp:
+            html_content = fp.readlines()
+            idx = [i for i, x in enumerate(html_content) if 'INSERT_DATA_HERE' in x][0]
+            first, last = html_content[:idx], html_content[idx+1:]
+            data = []
+            for idx, line in enumerate(records):
+                smarker, emarker = ('<td>', '<td/>') if idx else ('<th>', '<th/>')
+                data.append('<tr>')
+                for elem in line:
+                    data.append('%s%s%s' % (smarker, elem, emarker))
+                data.append('</tr>')
+        return ''.join(first + data + last)
+
+def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler,
+                 port=8008, json_output=True):
     global DBPATH
     DBPATH = db_path
 
     server_address = ('', port)
+    handler = SQL30Handler if json_output else SQL30HandlerHTML
     server = server(server_address, handler)
 
     def signal_handler(sig, frame):
@@ -92,7 +135,6 @@ def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler, port
     signal.signal(signal.SIGINT, signal_handler)
     print('Starting httpd on port %d...' % port)
     server.serve_forever()
-
 
 if __name__ == "__main__":
     if len(argv) >= 2:
