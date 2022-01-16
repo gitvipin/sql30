@@ -112,11 +112,11 @@ class SQL30HandlerHTML(SQL30Handler):
             first, last = html_content[:idx], html_content[idx+1:]
             data = []
             for idx, line in enumerate(records):
-                smarker, emarker = ('<td>', '<td/>') if idx else ('<th>', '<th/>')
-                data.append('<tr>')
+                smarker, emarker = ('<td>', '</td>') if idx else ('<th>', '</th>')
+                data.append('<tr>\n')
                 for elem in line:
-                    data.append('%s%s%s' % (smarker, elem, emarker))
-                data.append('</tr>')
+                    data.append('\t%s%s%s\n' % (smarker, elem, emarker))
+                data.append('</tr>\n')
         return ''.join(first + data + last)
 
 def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler,
