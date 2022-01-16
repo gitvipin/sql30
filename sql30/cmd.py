@@ -5,6 +5,20 @@
 # in the root directory of this project.
 '''
 A simple REST interface for reading SQLite Database.
+
+Following examples consider test_reviews.db as SQLITE
+database file. -d option takes qualified path to DB file.
+
+A sample file can be generated using the command :
+    python3 -msql30.tests.sanity -x
+
+USAGE:
+
+    # Run HTTP Server serving data as JSON respone.
+    python -msql30.cmd  -s  -p 8008 -d ./test_reviews.db
+
+    # Run HTTP Server data from SQLITE database as HTML response.
+    python -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
 '''
 
 import argparse
@@ -18,7 +32,6 @@ from sql30 import api
 
 class DummyDB(db.Model):
     pass
-
 
 
 def main():

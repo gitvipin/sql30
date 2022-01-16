@@ -6,7 +6,11 @@ If this module runs on your platform ( UNIX, WINDOWS, ESX etc.) you can use
 this module.
 
 USAGE: 
-     python -msql30.tests.sanity
+    # Run as testcase but cleanup after.
+    python -msql30.tests.sanity
+
+    # Run as utility and leave the database file after
+    python3 -msql30.tests.sanity -x
 '''
 import os
 import sqlite3
@@ -122,12 +126,14 @@ class TestReviews(unittest.TestCase):
         db.close()
 
 
-def main():
+def main(teardown=True):
     obj = TestReviews()
     obj.setUp()
     obj.test_simple()
-    obj.tearDown()
+    if teardown:
+        obj.tearDown()
 
 
 if __name__ == '__main__':
-    main()
+    teardown = False if len(sys.argv) >=2 else True
+    main(teardown=teardown)
