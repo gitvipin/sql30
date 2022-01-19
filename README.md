@@ -7,8 +7,8 @@ sql30 is a zero weight ORM for sqlite3 in Python.
 It is written using pure python constructs and has no dependency on any other module. There is no `requirements.txt` in the project in fact. Having zero dependency on any other module makes this package usable on variety of platforms including the ones which have limited or delayed support such as ESX.
 
 
-Usage
-------------
+## Usage
+
 
 SQL30 is incredibly simple to use. 
 
@@ -22,7 +22,7 @@ In the schema,
 
 Let's take an example. 
 
-Example
+### Example
 
 Let's say we have to store the reviews of a product in database and we chose sqlite3 for the purpose. Using SQL30, a sample schema can be defined as shown below.
 
@@ -112,9 +112,28 @@ sqlite3.IntegrityError: UNIQUE constraint failed: reviews.rid
 >>> db.commit()
 ```
 
-Once python prompt is exit, a SHELL prompt can be used for checking the contents of database as below using SQLITE3 cli. More commands on SQLITE3 CLI can be found here: https://sqlite.org/cli.html .
+## Browsing Database Contents
 
+SQLITE database can be browsed a couple of ways. Some of these are mentioned here.
+
+### sql30 server
+Traditionally, `sqlite3` has been used to browse database contents. However `sql30` comes with a utility that helps you browse contents of your SQLITE database in your favorite browser. SQL30 essentially reads the contents of your database, builds schema from it and then runs a HTTP server that responds to HTTP API requests to server contents of specific tables. Example below explains it further.
+
+##### Database Browsing Example
+
+```bash
+git clone http://github.com/gitvipin/sql30.git
+cd sql30
+# General sample sqlite3 DB file.
+python3 -msql30.tests.sanity -x
+# Serve the contents of database on HTTP server.
+python -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
 ```
+
+### sqlite3
+Using `sqlite` utility is a common method users like to look down at DB contents. Example below throws some light on this. More commands on SQLITE3 CLI can be found here: https://sqlite.org/cli.html .
+
+```bash
 (LPAD) root@Pali/tmp/LPAD$ sqlite3 reviews.db
 SQLite version 3.22.0 2018-01-22 18:45:57
 Enter ".help" for usage hints.
@@ -128,8 +147,10 @@ sqlite> .quit
 (LPAD) root@Pali/tmp/LPAD$
 ```
 
-Installation
-------------
+Other option is to install sqlite extensions in your code editors if they support it. Visual Studio Code is one that has extension for it.
+
+
+## Installation
 
 Fetching / Installing SQL30 is simple. Easiest way to consume sql30 is by installing it from pypi server (https://pypi.org/project/sql30/) by running following command. 
 
@@ -171,13 +192,13 @@ VMkernel prom-0505695d9ce.xyz.test 6.5.0 #1 SMP Release build-13753126 May 19 20
 ['DB_SCHEMA', 'VALIDATE_BEFORE_WRITE', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_form_constraints', '_get_fields', '_get_schema', '_validate_bfr_write', 'close', 'commit', 'create_table', 'cursor', 'init_db', 'read', 'remove', 'table_exists', 'update', 'write']
 ```
 
-Repository
-------------
+## Repository
+
 https://github.com/gitvipin/sql30 
 
 
-Requirements
-------------
+## Requirements
+
 Python 3.4+
 
 Share and enjoy!
