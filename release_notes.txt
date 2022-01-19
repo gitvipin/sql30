@@ -1,6 +1,14 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.5
+--------------
+- Adds support for HTML response from HTTP Server.
+- Basic HTML and styling for response.
+- Users can browse data on localhost after running server using
+  following command.
+    python -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
+
 0.2.4
 --------------
 - Allow DEFAULT_TABLE to be set in database schema itself.
