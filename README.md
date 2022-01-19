@@ -127,7 +127,7 @@ cd sql30
 # General sample sqlite3 DB file.
 python3 -msql30.tests.sanity -x
 # Serve the contents of database on HTTP server.
-python -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
+python3 -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
 ```
 
 ### sqlite3
