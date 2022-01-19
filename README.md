@@ -130,6 +130,10 @@ python3 -msql30.tests.sanity -x
 python3 -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
 ```
 
+Once above steps are run successfuly, you can browse data from your browser on http://localhost:8008/tables/reviews
+
+![SQL30 Browser](https://github.com/gitvipin/sql30/blob/master/sql30/doc/sql30.png)
+
 ### sqlite3
 Using `sqlite` utility is a common method users like to look down at DB contents. Example below throws some light on this. More commands on SQLITE3 CLI can be found here: https://sqlite.org/cli.html .
 
