@@ -1,6 +1,10 @@
 SQL30 (Release Notes)
 -----------------------
 
+0.2.6
+-------------
+- Fix for missing index.html in installations.
+
 0.2.5
 --------------
 - Adds support for HTML response from HTTP Server.
