@@ -3,23 +3,41 @@
 # SPDX-License-Identifier: BSD-2 License
 # The full license information can be found in LICENSE.txt
 # in the root directory of this project.
-'''
-A simple REST interface for reading SQLite Database.
+"""Command-line interface for SQL30 database operations.
+
+This module provides a command-line interface for SQL30 operations including:
+- Starting HTTP servers to serve database contents as JSON or HTML
+- Exporting database schemas to SQL files
+- Database browsing and inspection
 
 Following examples consider test_reviews.db as SQLITE
 database file. -d option takes qualified path to DB file.
 
-A sample file can be generated using the command :
+A sample file can be generated using the command:
     python3 -msql30.tests.sanity -x
 
 USAGE:
 
-    # Run HTTP Server serving data as JSON respone.
-    python -msql30.cmd  -s  -p 8008 -d ./test_reviews.db
+    # Run HTTP Server serving data as JSON response
+    python -msql30.cmd -s -p 8008 -d ./test_reviews.db
 
-    # Run HTTP Server data from SQLITE database as HTML response.
-    python -msql30.cmd  -s  -p 8008 -x -d ./test_reviews.db
-'''
+    # Run HTTP Server serving data as HTML response
+    python -msql30.cmd -s -p 8008 -x -d ./test_reviews.db
+    
+    # Export database schema to SQL file
+    python -msql30.cmd -e -d ./test_reviews.db -o backup.sql
+
+Command Line Arguments:
+    -d, --database: Name of database file (required)
+    -e, --export: Export database as SQL schema
+    -j, --json: Start server for JSON response
+    -l, --location: Location of DB file
+    -o, --output: Output schema file name (default: db.schema)
+    -p, --port: Port to connect (default: 5649)
+    -s, --server: Start HTTP Server for read-only requests
+    -v, --verbose: Verbose mode
+    -x, --html: Start server for HTML response
+"""
 
 import argparse
 import os
@@ -31,10 +49,34 @@ from sql30 import api
 
 
 class DummyDB(db.Model):
+    """Dummy database model for command-line operations.
+    
+    This is a minimal database model class used by the command-line interface
+    to perform operations on existing SQLite databases without requiring
+    a predefined schema. It inherits from db.Model and uses the database
+    schema discovery functionality to work with any SQLite database.
+    
+    Attributes:
+        Inherits all attributes from db.Model.
+    """
     pass
 
 
 def main():
+    """Main entry point for the SQL30 command-line interface.
+    
+    Parses command-line arguments and executes the requested operations:
+    - Database schema export to SQL files
+    - HTTP server startup for database browsing
+    
+    The function handles argument parsing, database path resolution,
+    and delegates to appropriate functions based on the provided options.
+    
+    Raises:
+        SystemExit: If required arguments are missing or invalid.
+        AssertionError: If port number is invalid.
+        FileNotFoundError: If database file is not found.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
