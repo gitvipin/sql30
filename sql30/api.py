@@ -38,20 +38,52 @@ DBPATH = None
 
 
 class SQL30Handler(BaseHTTPRequestHandler):
+    """HTTP request handler for serving SQLite database contents as JSON.
+    
+    This handler processes HTTP requests to serve database table contents
+    in JSON format. It expects requests to follow the pattern /tables/<table_name>
+    to retrieve data from specific tables.
+    
+    Attributes:
+        Inherits from BaseHTTPRequestHandler.
+    """
 
     def get_content_type(self):
+        """Get the content type for HTTP responses.
+        
+        Returns:
+            str: The MIME type for JSON responses.
+        """
         return 'application/json'
 
     def _set_headers(self):
+        """Set HTTP response headers.
+        
+        Sets the content type and CORS headers for the response.
+        """
         self.send_header('Content-type', self.get_content_type())
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
     def do_HEAD(self):
+        """Handle HTTP HEAD requests.
+        
+        Responds to HEAD requests by setting appropriate headers
+        without sending response body.
+        """
         self._set_headers()
 
-    # GET sends back a Hello world message
     def do_GET(self):
+        """Handle HTTP GET requests.
+        
+        Processes GET requests to serve database contents:
+        - Root path ('/') returns welcome message
+        - Paths containing '/tables/' serve table data
+        - Invalid paths return error messages
+        
+        Returns:
+            JSON response with either welcome message, table data, or error.
+        """
         if not self.path or self.path == '/':
             response, error = json.dumps(self.welcome()), None
         elif '/tables' not in self.path:
@@ -65,9 +97,23 @@ class SQL30Handler(BaseHTTPRequestHandler):
         self.wfile.write(response)
 
     def welcome(self):
+        """Generate welcome message for root path requests.
+        
+        Returns:
+            dict: Welcome message with status code.
+        """
         return {'message': 'Welcome to SQL30', 'staus': 200}
 
     def _get_records(self):
+        """Retrieve records from the specified database table.
+        
+        Parses the request path to extract table name and retrieves
+        all records from that table including headers.
+        
+        Returns:
+            tuple: (formatted_data, error_flag) where error_flag is None
+                   for success or error message string for failure.
+        """
         class DummyDB(db.Model):
             pass
 
@@ -86,11 +132,33 @@ class SQL30Handler(BaseHTTPRequestHandler):
                 return str(err), str(err)
 
     def format_output(self, data):
+        """Format data as JSON string.
+        
+        Args:
+            data: Data to be formatted as JSON.
+            
+        Returns:
+            str: JSON-formatted string representation of the data.
+        """
         return json.dumps(data)
 
 class SQL30HandlerHTML(SQL30Handler):
+    """HTTP request handler for serving SQLite database contents as HTML.
+    
+    This handler extends SQL30Handler to serve database table contents
+    in HTML format instead of JSON. It generates HTML tables for better
+    browser visualization of the data.
+    
+    Attributes:
+        Inherits from SQL30Handler.
+    """
 
     def welcome(self):
+        """Generate HTML welcome page for root path requests.
+        
+        Returns:
+            str: HTML content for the welcome page.
+        """
         return '''
         <!DOCTYPE html>
         <html>
@@ -100,9 +168,29 @@ class SQL30HandlerHTML(SQL30Handler):
         </html>
         '''
     def get_content_type(self):
+        """Get the content type for HTML responses.
+        
+        Returns:
+            str: The MIME type for HTML responses with UTF-8 encoding.
+        """
         return 'text/html; charset=UTF-8'
 
     def format_output(self, records):
+        """Format database records as HTML table.
+        
+        Reads the HTML template file and inserts database records as
+        an HTML table. The first row (header) is formatted with <th> tags,
+        subsequent rows use <td> tags.
+        
+        Args:
+            records (list): List of database records, first item should be headers.
+            
+        Returns:
+            str: Complete HTML page with embedded table data.
+            
+        Raises:
+            FileNotFoundError: If the HTML template file is not found.
+        """
         fpath = os.path.dirname(os.path.abspath(__file__))
         fpath = os.path.join(fpath, 'templates/index.html')
         html_content = None
@@ -121,6 +209,34 @@ class SQL30HandlerHTML(SQL30Handler):
 
 def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler,
                  port=8008, json_output=True):
+    """Start HTTP server to serve SQLite database contents.
+    
+    Creates and starts an HTTP server that serves database table contents
+    either as JSON or HTML responses. The server runs indefinitely until
+    interrupted with SIGINT (Ctrl+C).
+    
+    Args:
+        db_path (str): Path to the SQLite database file to serve.
+        server (class, optional): HTTP server class to use. Defaults to
+            ThreadingHTTPServer for concurrent request handling.
+        handler (class, optional): Request handler class. Defaults to
+            SQL30Handler. Will be overridden based on json_output parameter.
+        port (int, optional): Port number to listen on. Defaults to 8008.
+        json_output (bool, optional): If True, serve JSON responses using
+            SQL30Handler. If False, serve HTML responses using SQL30HandlerHTML.
+            Defaults to True.
+    
+    Example:
+        # Start server serving JSON responses on port 8080
+        start_server('./my_database.db', port=8080)
+        
+        # Start server serving HTML responses
+        start_server('./my_database.db', json_output=False)
+    
+    Note:
+        The server will run indefinitely until interrupted. Use Ctrl+C
+        to stop the server gracefully.
+    """
     global DBPATH
     DBPATH = db_path
 
@@ -129,6 +245,7 @@ def start_server(db_path, server=ThreadingHTTPServer, handler=SQL30Handler,
     server = server(server_address, handler)
 
     def signal_handler(sig, frame):
+        """Handle SIGINT signal for graceful server shutdown."""
         print('Closing server..')
         sys.exit(0)
 
